@@ -9,39 +9,6 @@ import express from 'express';
 
 const router = express.Router();
 
-let posts = [
-    { id: 1, title: '첫번째 제목', content: '첫번째 내용' },
-    { id: 2, title: '두번째 제목', content: '두번째 내용' },
-    { id: 3, title: '세번째 제목', content: '세번째 내용' },
-    { id: 4, title: '네번째 제목', content: '네번째 내용' },
-    { id: 5, title: '다섯번째 제목', content: '다섯번째 내용' },
-    { id: 6, title: '여섯번째 제목', content: '여섯번째 내용' },
-    { id: 7, title: '일곱번째 제목', content: '일곱번째 내용' },
-    { id: 8, title: '여덟번째 제목', content: '여덟번째 내용' },
-    { id: 9, title: '아홉번째 제목', content: '아홉번째 내용' },
-    { id: 10, title: '열번째 제목', content: '열번째 내용' },
-    { id: 11, title: '열한번째 제목', content: '열한번째 내용' },
-    { id: 12, title: '열두번째 제목', content: '열두번째 내용' },
-    { id: 13, title: '열세번째 제목', content: '열세번째 내용' },
-    { id: 14, title: '열네번째 제목', content: '열네번째 내용' },
-    { id: 15, title: '열다섯번째 제목', content: '열다섯번째 내용' },
-    { id: 16, title: '열여섯번째 제목', content: '열여섯번째 내용' },
-    { id: 17, title: '열일곱번째 제목', content: '열일곱번째 내용' },
-    { id: 18, title: '열여덟번째 제목', content: '열여덟번째 내용' },
-    { id: 19, title: '열아홉번째 제목', content: '열아홉번째 내용' },
-    { id: 20, title: '스무번째 제목', content: '스무번째 내용' },
-    { id: 21, title: '스물한번째 제목', content: '스물한번째 내용' },
-    { id: 22, title: '스물두번째 제목', content: '스물두번째 내용' },
-    { id: 23, title: '스물세번째 제목', content: '스물세번째 내용' },
-    { id: 24, title: '스물네번째 제목', content: '스물네번째 내용' },
-    { id: 25, title: '스물다섯번째 제목', content: '스물다섯번째 내용' },
-    { id: 26, title: '스물여섯번째 제목', content: '스물여섯번째 내용' },
-    { id: 27, title: '스물일곱번째 제목', content: '스물일곱번째 내용' },
-    { id: 28, title: '스물여덟번째 제목', content: '스물여덟번째 내용' },
-    { id: 29, title: '스물아홉번째 제목', content: '스물아홉번째 내용' },
-    { id: 30, title: '서른번째 제목', content: '서른번째 내용' }
-]
-
 // 전체페이지 리스트 조회
 router.get('/posts', (req, res) => {
     const page = parseInt(req.query.page) || 1; // 현재 페이지 번호

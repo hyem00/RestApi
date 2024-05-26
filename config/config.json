@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "1738",
+    "database": "nodejs01",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "test_user",
+    "password": "test_password",
+    "database": "test_database",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "prod_user",
+    "password": "prod_password",
+    "database": "prod_database",
+    "host": "prod_host",
+    "dialect": "mysql"
+  }
+}

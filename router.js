@@ -1,9 +1,9 @@
 import express from 'express';
+import {post} from './models/index.js'
 
 // TODO 
-// DB 연결하기 (시간나면 rds 였나 그 뭐시기 알지 그거까지 연결해서 사용해보기)
 // 시퀄라이즈 연결하기 
-// 페이지네이션 디비 나누기 = 토탈 페이지 갯수 그거 구현해줘야함 
+// 페이지네이션 디비 나누기 = 토탈 페이지 갯수 그거 테스트
 // 에러핸들링 추가하기 
 // 생성 삭제 조회 및 레포 연결해서 사용하기
 
@@ -114,3 +114,4 @@ router.delete('/posts/:id', (req, res) => {
 });
 
 export default router;
+

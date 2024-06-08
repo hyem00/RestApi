@@ -8,7 +8,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// 아우 넘 졸려여 . . . https://sidorares.github.io/node-mysql2/docs
 
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
@@ -33,5 +32,5 @@ app.use('/', router);
   }
 })();
   
-
+export { connection }; 
 export default app;

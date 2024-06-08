@@ -1,4 +1,5 @@
 import express from 'express';
+import {connection} from './app.js'
 
 // TODO 
 // 인풋으로 들어오는 데이터 검증 그거 해보기 
@@ -9,99 +10,124 @@ import express from 'express';
 const router = express.Router();
 
 // // 전체페이지 리스트 조회
-// router.get('/posts', async(req, res) => {
-//     const page = req.query.page ? parseInt(req.query.page) : 1;
-//     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
-//     try {
-//         const offset = (page - 1) * pageSize;
-//         const posts = await Post.findAll({
-//           offset: offset,
-//           limit: pageSize,
-//           // order: [['createdAt', 'DESC']] 추후 추가
-//         });
-//         if (posts.ength === 0){
-//             res.status(404).json({message:"게시물이 존재하지 않습니다"});
-//         }
-//         res.json(posts);
-//     } catch (error) {
-//       res.status(500).json({message: error.message });
-//     }
-// });
+router.get('/posts', async(req, res) => {
 
-// // 게시물 상세페이지 조회
-// router.get('/posts/:id', async(req, res) => {
-//     const id = parseInt(req.params.id);
-//     const post = await Post.findByPk(id)
-//     if (!post) {
-//         res.status(404).json({meseage:"게시물을 찾을 수 없습니다."});
-//     } else {
-//         res.json(post);
-//     }
-// });
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const offset = (page - 1) * pageSize;
 
-// // 게시물 생성
-// router.post('/posts', async (req, res) => {
-//     const { title, content } = req.body;
-//     if (!title || !content) {
-//         return res.status(400).json({ message: "게시물 제목과 내용을 모두 입력해주세요." });
-//     }
+    try {
+        const [posts] = await connection.execute(
+            `SELECT * FROM posts LIMIT ${pageSize} OFFSET ${offset}`
+        );
+        
+        if (posts.length === 0) {
+            return res.status(404).json({ message: "게시물이 존재하지 않습니다" });
+        }
 
-//     try {
-//         const newPost = await Post.create({
-//             title: title,
-//             content: content,
-//         });
-//         res.status(201).json(newPost);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// });
+        const [totalCount] = await connection.execute('SELECT COUNT(*) as count FROM posts');
+        const totalPosts = totalCount[0].count;
 
-// // 게시물 수정
-// router.put('/posts/:id', async(req, res) => {
-//     const id = parseInt(req.params.id);
-//     const { title, content } = req.body;
+        res.json({
+            posts: posts,
+            currentPage: page,
+            totalPages: Math.ceil(totalPosts / pageSize),
+            totalPosts: totalPosts,
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
-//     if (!title || !content) {
-//         res.status(400).json({ message: '게시물 제목과 내용을 모두 입력해주세요.' });
-//     } 
+// 게시물 상세페이지 조회
+router.get('/posts/:id', async(req, res) => {
+    const { id } = req.params;
+    try {
+      const [post] = await connection.execute('SELECT * FROM posts WHERE id = ?', [id]);
+      if (post.length === 0) {
+        return res.status(404).json({ error: '해당 게시물이 존재하지 않습니다.' });
+      }
+      res.json(post[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+});
+
+// 게시물 생성
+router.post('/posts', async (req, res) => {
+    const { title, content } = req.body;
+    if (!title || !content) {
+        return res.status(400).json({ message: "게시물 제목과 내용을 모두 입력해주세요." });
+    }
+
+    try {
+        const [result] = await connection.execute(
+            'INSERT INTO posts (title, content) VALUES (?, ?)',
+            [title, content]
+          );
+     
+        res.status(201).json({ id: result.insertId, title, content });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// 게시물 수정
+router.put('/posts/:id', async(req, res) => {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+        res.status(400).json({ message: '게시물 제목과 내용을 모두 입력해주세요.' });
+    } 
     
-//     try {
-//         const post = await Post.findByPk(id);
+    try {
+        const [post] = await connection.execute(
+            `select * from posts where id = ?` ,
+            [id]
+        )
 
-//         if (!post) {
-//             return res.status(404).json({ message: '해당 게시물이 존재하지 않습니다.' });
-//         }
+        if (post.length ===0) {
+            return res.status(404).json({ message: '해당 게시물이 존재하지 않습니다.' });
+        }
 
-//         post.title = title;
-//         post.content = content;
-//         await post.save();
+        await connection.execute(
+            'UPDATE posts SET title = ?, content = ? WHERE id = ?',
+            [title, content, id]
+          );
 
-//         res.json(post);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
+        // Q1 : 이거 수정이나 생성의 결과물을 항상 다시 조회해서 리턴해야하는가 ... ? -> 혼자 답 ! 마자요 ! 
+        const [updatedPost] = await connection.execute(
+            'SELECT * FROM posts WHERE id = ?',
+            [id]
+          );
+        res.json(updatedPost[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
     
-// });
+});
 
-// // 게시물 삭제
-// router.delete('/posts/:id', async(req, res) => {
-//     const id = parseInt(req.params.id);
+// 게시물 삭제
+router.delete('/posts/:id', async(req, res) => {
+    const { id } = req.params;
   
-//     try {
-//         const post = await Post.findByPk(id);
-
-//         if (!post) {
-//             return res.status(404).json({ message: '해당 게시물이 존재하지 않습니다.' });
-//         }
-
-//         // 게시물 삭제
-//         await post.destroy();
-//         res.json({ message: '게시물이 성공적으로 삭제되었습니다.' });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// });
+    try {
+        const [post] = await connection.execute(
+            `select * from posts where id = ?` ,
+            [id]
+        )
+        if(post.length ===0){
+            res.status(404).json({message : "해당 게시글이 존재하지 않습니다."})
+        }
+        await connection.execute('DELETE FROM posts WHERE id = ?', [id]);
+        // 삭제는 이렇게 응답을 끝내는 경우도 있다고 함
+        // res.status(204).end();
+        res.json({message : "성공적으로 삭제되었습니다."})
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+});
 
 export default router;
 

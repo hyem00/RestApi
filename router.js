@@ -2,14 +2,13 @@ import express from 'express';
 import {connection} from './app.js'
 
 // TODO 
-// 인풋으로 들어오는 데이터 검증 그거 해보기 
+// 현재 부하 테스트가 정상적이지 않음 이슈 찾아서 해결하기 
 // 생성 수정 삭제 날짜 만들어서 소프트 딜리트 노드로도 해보기
-// orm 없이 구현해보기
 
 
 const router = express.Router();
 
-// // 전체페이지 리스트 조회
+// 전체페이지 리스트 조회
 router.get('/posts', async(req, res) => {
 
     const page = parseInt(req.query.page) || 1;
@@ -41,6 +40,7 @@ router.get('/posts', async(req, res) => {
 
 // 게시물 상세페이지 조회
 router.get('/posts/:id', async(req, res) => {
+    console.log("테스트 돌아가고는 있음")
     const { id } = req.params;
     try {
       const [post] = await connection.execute('SELECT * FROM posts WHERE id = ?', [id]);
@@ -96,7 +96,7 @@ router.put('/posts/:id', async(req, res) => {
             [title, content, id]
           );
 
-        // Q1 : 이거 수정이나 생성의 결과물을 항상 다시 조회해서 리턴해야하는가 ... ? -> 혼자 답 ! 마자요 ! 
+        // Q1 : 이거 수정이나 생성의 결과물을 항상 다시 조회해서 리턴해야하는가 ... ? 맞네 항상 그래야할 수 밖에 없음 
         const [updatedPost] = await connection.execute(
             'SELECT * FROM posts WHERE id = ?',
             [id]

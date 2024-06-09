@@ -8,8 +8,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// 성능(부하) 테스트 k6 https://k6.io/docs/get-started/installation/ 
-
 const connection = await mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
